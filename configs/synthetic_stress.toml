@@ -1,0 +1,19 @@
+# Near-periodic stress cases (Table 3, Appendix I.2). Same design as the main experiment.
+
+signals = ["g1_phase_drift", "g2_amplitude_modulated"]
+n_replicates = 100
+n_observations = 400
+m = 20
+alpha = 0.05
+b = 120
+n_subsamples = 500
+n_permutations = 500
+noise = [
+    { kind = "none", scale = 0.0 },
+    { kind = "BU", scale = 0.02 },
+    { kind = "BU", scale = 0.05 },
+    { kind = "BU", scale = 0.1 },
+    { kind = "TG", scale = 0.02 },
+    { kind = "TG", scale = 0.05 },
+    { kind = "TG", scale = 0.1 },
+]
