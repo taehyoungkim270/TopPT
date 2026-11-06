@@ -1,5 +1,8 @@
 # BIDMC respiration recordings (Table 2, Figure 4, Appendix I.3).
 
+# Root seed for every random stream, fixed before the final run.
+seed = 2026
+
 database = "bidmc"
 records = [
     "bidmc01", "bidmc02", "bidmc03", "bidmc04", "bidmc05", "bidmc06", "bidmc07", "bidmc08", "bidmc09", "bidmc10",

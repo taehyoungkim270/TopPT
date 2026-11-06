@@ -1,5 +1,8 @@
 # Main bounded-error experiment (Table 1, Appendix I.1).
 
+# Root seed for every random stream, fixed before the final run.
+seed = 2026
+
 signals = ["f1_rational", "f2_log_exp", "h1_linear", "h2_quadratic", "h3_logistic", "h4_aperiodic"]
 n_replicates = 100
 n_observations = 400

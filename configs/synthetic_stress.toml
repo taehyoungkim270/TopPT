@@ -1,5 +1,8 @@
 # Near-periodic stress cases (Table 3, Appendix I.2). Same design as the main experiment.
 
+# Root seed for every random stream, fixed before the final run.
+seed = 2026
+
 signals = ["g1_phase_drift", "g2_amplitude_modulated"]
 n_replicates = 100
 n_observations = 400

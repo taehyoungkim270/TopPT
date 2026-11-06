@@ -26,29 +26,17 @@ from .method import (
     strongest_period,
     toppt_test,
 )
-from .runs import ROOT, load_config, run_batches, start_run
-
-RNG_PLAN = (
-    "NeurIPS submission: default_rng(100000 * record + 1000 * window + period) for subsampling, "
-    "default_rng(100000 * record + 10000 * window + 50000) for permutation, with zero-based "
-    "positions in the configuration."
-)
+from .runs import ROOT, load_config, make_rng, run_batches, start_run
 
 
-def make_rng(record: int, window: int, period: int | None = None) -> np.random.Generator:
-    """Return the generator for subsampling at one period, or for a window's permutations."""
-    if period is None:
-        return np.random.default_rng(100_000 * record + 10_000 * window + 50_000)
-    return np.random.default_rng(100_000 * record + 1_000 * window + period)
-
-
-def run_record(config: dict, data_dir: Path, indexed_record: tuple[int, str]) -> list[dict]:
+def run_record(config: dict, data_dir: Path, record: str) -> list[dict]:
     """Test every window of one record and return one row per window and period.
 
     TopPT is corrected over the record's window-period pairs, and the baselines,
-    which run once per window, are corrected over its windows.
+    which run once per window, are corrected over its windows. Random streams are
+    keyed by record name, window start, and period, so a record gives the same
+    results whichever other records are run.
     """
-    index, record = indexed_record
     m, alpha, bounds = config["m"], config["alpha"], config["period_bounds"]
     times, values = load_series(record, data_dir, config)
     windows = [
@@ -69,6 +57,7 @@ def run_record(config: dict, data_dir: Path, indexed_record: tuple[int, str]) ->
 
     rows = []
     for window, ((window_times, window_values), periods) in enumerate(zip(windows, periods_by_window)):
+        start = config["window_starts"][window]
         baselines = {
             **gls_test(window_times, window_values, alpha_baseline, min_period=bounds[0], max_period=bounds[1]),
             **fisher_g_test(window_times, window_values, alpha_baseline),
@@ -77,7 +66,7 @@ def run_record(config: dict, data_dir: Path, indexed_record: tuple[int, str]) ->
                 window_values,
                 alpha_baseline,
                 config["n_permutations"],
-                make_rng(index, window),
+                make_rng(config["seed"], record, start, "permutation"),
             ),
         }
         for period_index, period in enumerate(periods):
@@ -87,7 +76,7 @@ def run_record(config: dict, data_dir: Path, indexed_record: tuple[int, str]) ->
                 {
                     "record": record,
                     "window_index": window,
-                    "window_start": config["window_starts"][window],
+                    "window_start": start,
                     "period_index": period_index,
                     "period": period,
                     "n_points": len(cloud),
@@ -99,7 +88,7 @@ def run_record(config: dict, data_dir: Path, indexed_record: tuple[int, str]) ->
                         alpha_toppt,
                         b,
                         config["n_subsamples"],
-                        make_rng(index, window, period_index),
+                        make_rng(config["seed"], record, start, period, "subsampling"),
                     ),
                     **baselines,
                 }
@@ -111,15 +100,8 @@ def run_experiment(config: dict, run_dir: Path, data_dir: Path, workers: int) ->
     """Download the records, then run every record that has not finished yet."""
     records = config["records"]
     download_records(config["database"], records, data_dir)
-    start_run(
-        config,
-        run_dir,
-        ["data.py", "method/*.py", "run_real.py"],
-        RNG_PLAN,
-        record_files(records, data_dir),
-    )
-    batches = {record: (index, record) for index, record in enumerate(records)}
-    run_batches(partial(run_record, config, data_dir), batches, run_dir, workers)
+    start_run(config, run_dir, ["data.py", "method/*.py", "run_real.py"], record_files(records, data_dir))
+    run_batches(partial(run_record, config, data_dir), {r: r for r in records}, run_dir, workers)
 
 
 def main() -> None:

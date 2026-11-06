@@ -5,6 +5,7 @@ from new.run_synthetic import run_experiment
 
 def test_results_do_not_depend_on_workers_or_on_resuming(tmp_path):
     config = {
+        "seed": 0,
         "signals": ["f1_rational", "h1_linear"],
         "n_replicates": 2,
         "n_observations": 80,

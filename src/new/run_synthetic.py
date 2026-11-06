@@ -13,8 +13,6 @@ import os
 from pathlib import Path
 from time import perf_counter
 
-import numpy as np
-
 from .dgp import (
     PERIODIC,
     SIGNALS,
@@ -24,25 +22,22 @@ from .dgp import (
     known_period_tau,
 )
 from .method import delay_cloud, fisher_g_test, gls_test, permutation_test, toppt_test
-from .runs import ROOT, load_config, run_batches, start_run
-
-RNG_PLAN = "NeurIPS submission: default_rng(replicate + offset), with offsets 20000 (data), 0 (subsampling), 30000 (permutation)."
-RNG_OFFSETS = {"data": 20_000, "subsampling": 0, "permutation": 30_000}
-
-
-def make_rng(replicate: int, task: str) -> np.random.Generator:
-    """Return the generator for one random task in one replicate."""
-    return np.random.default_rng(replicate + RNG_OFFSETS[task])
+from .runs import ROOT, load_config, make_rng, run_batches, start_run
 
 
 def run_replicate(config: dict, signal_name: str, noise: NoiseModel, replicate: int) -> dict:
-    """Generate one dataset, apply every method to it, and return one results row."""
+    """Generate one dataset, apply every method to it, and return one results row.
+
+    Every signal, noise setting, replicate, and random task has its own stream.
+    """
     m, alpha = config["m"], config["alpha"]
     tau = known_period_tau(m)
     signal = SIGNALS[signal_name]
-    times, values = generate_observations(
-        signal, noise, config["n_observations"], m * tau, make_rng(replicate, "data")
-    )
+
+    def rng(task: str):
+        return make_rng(config["seed"], signal_name, noise.kind, noise.scale, replicate, task)
+
+    times, values = generate_observations(signal, noise, config["n_observations"], m * tau, rng("data"))
     cloud = delay_cloud(times, values, m, tau)
     zeta = interpolation_error_bound(signal, noise, times, m)
     return {
@@ -53,14 +48,10 @@ def run_replicate(config: dict, signal_name: str, noise: NoiseModel, replicate: 
         "replicate": replicate,
         "n_points": len(cloud),
         "zeta": zeta,
-        **toppt_test(
-            cloud, alpha, config["b"], config["n_subsamples"], make_rng(replicate, "subsampling"), zeta
-        ),
+        **toppt_test(cloud, alpha, config["b"], config["n_subsamples"], rng("subsampling"), zeta),
         **gls_test(times, values, alpha),
         **fisher_g_test(times, values, alpha),
-        **permutation_test(
-            times, values, alpha, config["n_permutations"], make_rng(replicate, "permutation")
-        ),
+        **permutation_test(times, values, alpha, config["n_permutations"], rng("permutation")),
     }
 
 
@@ -71,7 +62,7 @@ def _run_scenario(config: dict, scenario: tuple[str, NoiseModel]) -> list[dict]:
 
 def run_experiment(config: dict, run_dir: Path, workers: int) -> None:
     """Run every scenario in the configuration that has not finished yet."""
-    start_run(config, run_dir, ["dgp/*.py", "method/*.py", "run_synthetic.py"], RNG_PLAN)
+    start_run(config, run_dir, ["dgp/*.py", "method/*.py", "run_synthetic.py"])
     scenarios = {
         f"{name}__{noise['kind']}_{noise['scale']}": (name, NoiseModel(noise["kind"], noise["scale"]))
         for name in config["signals"]

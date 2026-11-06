@@ -12,10 +12,29 @@ import shutil
 import subprocess
 import tomllib
 
+import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGES = ("gudhi", "numpy", "pandas", "scipy", "wfdb")
+
+
+RNG_PLAN = (
+    "PCG64 seeded by SeedSequence([seed, *words]), where words are the first 16 bytes of "
+    "SHA-256 of the compact JSON task key, read as four little-endian uint32."
+)
+
+
+def make_rng(seed: int, *key) -> np.random.Generator:
+    """Return the generator for one random task, identified by ``key``.
+
+    The stream depends only on the root seed and the key, never on run order or on
+    which worker runs the task. Python's ``hash`` changes between sessions, so the key
+    is hashed with SHA-256 instead.
+    """
+    label = json.dumps(key, separators=(",", ":")).encode()
+    words = np.frombuffer(hashlib.sha256(label).digest()[:16], dtype="<u4")
+    return np.random.default_rng(np.random.SeedSequence([seed, *words.tolist()]))
 
 
 def load_config(path: Path) -> dict:
@@ -56,7 +75,6 @@ def start_run(
     config: dict,
     run_dir: Path,
     source_patterns: Iterable[str],
-    rng_plan: str,
     data_files: Iterable[Path] = (),
 ) -> None:
     """Record what produces a run, and refuse to mix it with a different earlier run.
@@ -68,7 +86,7 @@ def start_run(
     sources = sorted(p for pattern in source_patterns for p in (ROOT / "src/new").glob(pattern))
     identity = {
         "config": config,
-        "rng_plan": rng_plan,
+        "rng_plan": RNG_PLAN,
         "source_sha256": {str(path.relative_to(ROOT)): _sha256(path) for path in sources},
         "data_sha256": {path.name: _sha256(path) for path in data_files},
         "python": platform.python_version(),

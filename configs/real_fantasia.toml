@@ -1,5 +1,8 @@
 # Fantasia respiration recordings (Table 2, Figure 4, Appendix I.3).
 
+# Root seed for every random stream, fixed before the final run.
+seed = 2026
+
 database = "fantasia"
 records = [
     "f1y01", "f1y02", "f1y03", "f1y04", "f1y05", "f1y06", "f1y07", "f1y08", "f1y09", "f1y10",
