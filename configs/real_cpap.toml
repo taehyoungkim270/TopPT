@@ -1,0 +1,25 @@
+# Canterbury CPAP paced breathing: recordings with a protocol-defined period.
+
+# Root seed for every random stream, fixed before the final run.
+seed = 2026
+
+url = "https://physionet-open.s3.amazonaws.com/cpap-data-canterbury/cpap-data-canterbury-1.0.1.zip"
+sha256 = "33548494fc52efb0b4fdad0b7ede439b35e2e2163768d4fdc43e56c09b043191"
+folder = "cpap-pressure-and-flow-data-from-a-local-trial-of-30-adults-at-the-university-of-canterbury-1.0.1"
+
+# CPAP pressures and the prescribed breathing rate of each condition folder.
+peep_cmh2o = [4, 7]
+rates_per_min = { Long = 6, MediumLong = 9, MediumShort = 30, Short = 60 }
+
+# Each recording starts with this many cued breaths, followed by unpaced rest.
+n_breaths = 17
+downsample_hz = 25.0
+
+m = 8
+alpha = 0.05
+max_anchors = 300
+b_fraction = 0.99
+n_subsamples = 300
+n_permutations = 500
+# Search range of the Lomb-Scargle baseline, in seconds.
+period_bounds = [0.5, 20.0]
