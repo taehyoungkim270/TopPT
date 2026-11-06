@@ -23,3 +23,23 @@ def generate_observations(
     """
     times = np.linspace(DOMAIN[0], DOMAIN[1] + extension, n_observations)
     return times, signal(times) + noise.sample(times.shape, rng)
+
+
+def interpolation_error_bound(
+    signal: Callable[[np.ndarray], np.ndarray],
+    noise: NoiseModel,
+    times: np.ndarray,
+    m: int,
+) -> float:
+    """Return zeta, the bound on the error of a delay vector, for the robust rule.
+
+    ``zeta = sqrt(m + 1) * (sigma + L * delta**2 / 8)``, where ``sigma`` is the noise
+    bound and ``delta`` is the largest gap between observed times. ``L`` is a numerical
+    estimate of the largest second derivative, computed from the true signal, so this
+    belongs here and not with the method.
+    """
+    grid = np.linspace(times[0], times[-1], 5000)
+    first = np.gradient(signal(grid), grid, edge_order=2)
+    second = np.gradient(first, grid, edge_order=2)
+    delta = np.max(np.diff(times))
+    return float(np.sqrt(m + 1) * (noise.scale + np.abs(second).max() * delta**2 / 8.0))
