@@ -1,6 +1,6 @@
 """Test the experiment runner end to end on a tiny design."""
 
-from new.run_synthetic import run_experiment
+from toppt.run_synthetic import run_experiment
 
 
 def test_results_do_not_depend_on_workers_or_on_resuming(tmp_path):

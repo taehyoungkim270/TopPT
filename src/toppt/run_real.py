@@ -1,6 +1,6 @@
 """Run a real-data experiment from a configuration file.
 
-Usage: PYTHONPATH=src python -m new.run_real configs/real_fantasia.toml
+Usage: PYTHONPATH=src python -m toppt.run_real configs/real_fantasia.toml
 
 Records are downloaded to ``data/<database>/`` unless ``--data-dir`` is given, and
 results go to ``results/<config name>/`` unless ``--output-dir`` is given. Each

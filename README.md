@@ -33,7 +33,7 @@ not stored in this repository. The runners download the records they need.
 | Path | Contents |
 | --- | --- |
 | `src/old/` | Original code used for the NeurIPS submission (see its [README](src/old/README.md)) |
-| `src/new/` | Reorganized code, in progress |
+| `src/toppt/` | Reorganized code, in progress |
 | `configs/` | Settings for each experiment |
 | `tests/` | Test suite |
 | `reference/neurips_submission/` | Saved results behind the submission's tables (see its [README](reference/neurips_submission/README.md)) |
@@ -50,10 +50,10 @@ python -m pytest
 ## Running the experiments
 
 ```bash
-PYTHONPATH=src python -m new.run_synthetic configs/synthetic_main.toml
-PYTHONPATH=src python -m new.run_synthetic configs/synthetic_stress.toml
-PYTHONPATH=src python -m new.run_real configs/real_fantasia.toml
-PYTHONPATH=src python -m new.run_real configs/real_bidmc.toml
+PYTHONPATH=src python -m toppt.run_synthetic configs/synthetic_main.toml
+PYTHONPATH=src python -m toppt.run_synthetic configs/synthetic_stress.toml
+PYTHONPATH=src python -m toppt.run_real configs/real_fantasia.toml
+PYTHONPATH=src python -m toppt.run_real configs/real_bidmc.toml
 ```
 
 Results go to `results/<config name>/`, with `metadata.json` recording the

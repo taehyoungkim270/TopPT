@@ -4,14 +4,14 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from new.dgp import (
+from toppt.dgp import (
     SIGNALS,
     NoiseModel,
     generate_observations,
     interpolation_error_bound,
     known_period_tau,
 )
-from new.method import (
+from toppt.method import (
     delay_cloud,
     fisher_g_test,
     gls_test,

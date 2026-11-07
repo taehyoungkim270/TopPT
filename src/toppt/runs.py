@@ -80,10 +80,10 @@ def start_run(
     """Record what produces a run, and refuse to mix it with a different earlier run.
 
     The fingerprint covers the configuration, the source files matching
-    ``source_patterns`` under ``src/new``, the data files, and package versions.
+    ``source_patterns`` under ``src/toppt``, the data files, and package versions.
     Results already in ``run_dir`` can be reused only if it has not changed.
     """
-    sources = sorted(p for pattern in source_patterns for p in (ROOT / "src/new").glob(pattern))
+    sources = sorted(p for pattern in source_patterns for p in (ROOT / "src/toppt").glob(pattern))
     identity = {
         "config": config,
         "rng_plan": RNG_PLAN,

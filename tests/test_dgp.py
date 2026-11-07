@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from new.dgp import (
+from toppt.dgp import (
     DOMAIN,
     PERIOD,
     PERIODIC,

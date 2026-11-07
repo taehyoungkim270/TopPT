@@ -1,6 +1,6 @@
 """Make the paper's Tables 1-3 and Figure 4 from experiment results.
 
-Usage: PYTHONPATH=src python -m new.report
+Usage: PYTHONPATH=src python -m toppt.report
 
 Reads ``results/<experiment>/raw_results.csv`` and writes CSV and LaTeX tables, the
 figure, and a comparison with the NeurIPS submission to ``results/paper/``.

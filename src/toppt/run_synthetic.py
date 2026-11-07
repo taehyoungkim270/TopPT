@@ -1,6 +1,6 @@
 """Run a synthetic experiment from a configuration file.
 
-Usage: PYTHONPATH=src python -m new.run_synthetic configs/synthetic_main.toml
+Usage: PYTHONPATH=src python -m toppt.run_synthetic configs/synthetic_main.toml
 
 Results go to ``results/<config name>/`` unless ``--output-dir`` is given. Each
 scenario (one signal and noise setting) is a batch, so rerunning the same command
